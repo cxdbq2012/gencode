@@ -13,15 +13,18 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @goal gencode
  */
 public class GencodeMojo extends AbstractMojo {
+
+    /**
+     * 生成代码文件时如果已经存在是否覆盖文件.
+     * @parameter parameter="${override}"
+     */
+    private Boolean override = false;
 
     /**
      * name of the package.
@@ -97,7 +100,7 @@ public class GencodeMojo extends AbstractMojo {
         Map<String, Object> root = new HashMap<>();
 
         List<String> tables = DatabaseUtil.getTableNames();
-
+        Date date = new Date();
         for(String tb : tables) {
             root.clear();
 
@@ -126,6 +129,7 @@ public class GencodeMojo extends AbstractMojo {
                 File f = new File(baseDir+"/src/main/java/"+basePackageName+"/entity/");
                 f.mkdirs();
                 f = new File(baseDir+"/src/main/java/"+basePackageName+"/entity/"+table.getTableName()+".java");
+                f = checkFile(basePackageName, date, table, f);
                 FileWriter out = new FileWriter(f);
                 temp.process(root, out);
             } catch (TemplateException e) {
@@ -137,6 +141,7 @@ public class GencodeMojo extends AbstractMojo {
                 File f = new File(baseDir+"/src/main/java/"+basePackageName+"/dao/mapper/");
                 f.mkdirs();
                 f = new File(baseDir+"/src/main/java/"+basePackageName+"/dao/mapper/"+table.getTableName()+"Mapper.java");
+                f = checkFile(basePackageName, date, table, f);
                 FileWriter out = new FileWriter(f);
 
                 mapperTemp.process(root, out);
@@ -149,6 +154,7 @@ public class GencodeMojo extends AbstractMojo {
                 File f = new File(baseDir+"/src/main/java/"+basePackageName+"/service/");
                 f.mkdirs();
                 f = new File(baseDir+"/src/main/java/"+basePackageName+"/service/"+table.getTableName()+"Service.java");
+                f = checkFile(basePackageName, date, table, f);
                 FileWriter out = new FileWriter(f);
 
                 serviceTemp.process(root, out);
@@ -161,6 +167,7 @@ public class GencodeMojo extends AbstractMojo {
                 File f = new File(baseDir+"/src/main/java/"+basePackageName+"/controller/");
                 f.mkdirs();
                 f = new File(baseDir+"/src/main/java/"+basePackageName+"/controller/"+table.getTableName()+"Controller.java");
+                f = checkFile(basePackageName, date, table, f);
                 FileWriter out = new FileWriter(f);
 
                 controllerTemp.process(root, out);
@@ -172,5 +179,19 @@ public class GencodeMojo extends AbstractMojo {
         }
 
         DatabaseUtil.closeConnection();
+    }
+
+    private File checkFile(String basePackageName, Date date, Table table, File f) {
+        if(f.exists()){
+            if(!override){
+                f = new File(baseDir+"/src/main/java/"+basePackageName+"/entity/"+table.getTableName()+".java."+date.getTime());
+                getLog().info("==>源文件已经存在，生成别名:"+f.getAbsolutePath());
+            } else {
+                getLog().info("==>源文件已经存在，覆盖原文件:"+f.getAbsolutePath());
+            }
+        }else{
+            getLog().info("==>生成源文件:"+f.getAbsolutePath());
+        }
+        return f;
     }
 }

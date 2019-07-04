@@ -10,9 +10,10 @@ public class DatabaseUtil {
 
     public static Log LOGGER;
     private static String DRIVER = "com.mysql.jdbc.Driver";
-    private static String URL = "jdbc:mysql://localhost:3306/test?useUnicode=true&characterEncoding=utf8";
+    private static String URL = "jdbc:mysql://localhost:3306/test?useUnicode=true";
     private static String USERNAME = "root";
     private static String PASSWORD = "123456";
+    private static String DBNAME;
 
     private static final String SQL = "SELECT * FROM ";// 数据库操作
 
@@ -22,6 +23,7 @@ public class DatabaseUtil {
         URL = "jdbc:mysql://"+host+"/"+dbName+"?useUnicode=true&characterEncoding=utf8";
         USERNAME = user;
         PASSWORD = pwd;
+        DBNAME = dbName;
         LOGGER.info("连接到："+URL);
     }
 
@@ -74,7 +76,7 @@ public class DatabaseUtil {
             //获取数据库的元数据
             DatabaseMetaData db = conn.getMetaData();
             //从元数据中获取到所有的表名
-            rs = db.getTables(null, null, null, new String[] { "TABLE" });
+            rs = db.getTables(DBNAME, null, null, new String[] { "TABLE" });
             while(rs.next()) {
                 tableNames.add(rs.getString(3));
             }
@@ -195,6 +197,7 @@ public class DatabaseUtil {
         return columnComments;
     }
     public static void main(String[] args) {
+        DatabaseUtil.init("localhost","test2","root","123456");
         List<String> tableNames = getTableNames();
         System.out.println("tableNames:" + tableNames);
         for (String tableName : tableNames) {

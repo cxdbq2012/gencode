@@ -66,6 +66,11 @@ public class GencodeMojo extends AbstractMojo {
      * @required
      */
     private String dbPwd;
+    /**
+     * spec table .
+     * @parameter parameter="${specTable}"
+     */
+    private String specTable;
 
 
     @Override
@@ -104,6 +109,10 @@ public class GencodeMojo extends AbstractMojo {
         for(String tb : tables) {
             root.clear();
 
+            if(specTable != null && !specTable.contains(tb)){
+                continue;
+            }
+
             List<String> columnNames = DatabaseUtil.getColumnNames(tb);
             List<String> ccs = DatabaseUtil.getColumnComments(tb);
             List< String> types = DatabaseUtil.getColumnTypes(tb);
@@ -129,9 +138,8 @@ public class GencodeMojo extends AbstractMojo {
                 File f = new File(baseDir+"/src/main/java/"+basePackageName+"/entity/");
                 f.mkdirs();
                 f = new File(baseDir+"/src/main/java/"+basePackageName+"/entity/"+table.getTableName()+".java");
-                f = checkFile(basePackageName, date, table, f);
-                FileWriter out = new FileWriter(f);
-                temp.process(root, out);
+//                f = checkFile(basePackageName, date, table, f);
+                checkCreate(temp, root, f);
             } catch (TemplateException e) {
                 e.printStackTrace();
             } catch (IOException e) {
@@ -141,10 +149,11 @@ public class GencodeMojo extends AbstractMojo {
                 File f = new File(baseDir+"/src/main/java/"+basePackageName+"/dao/mapper/");
                 f.mkdirs();
                 f = new File(baseDir+"/src/main/java/"+basePackageName+"/dao/mapper/"+table.getTableName()+"Mapper.java");
-                f = checkFile(basePackageName, date, table, f);
-                FileWriter out = new FileWriter(f);
+//                f = checkFile(basePackageName, date, table, f);
 
-                mapperTemp.process(root, out);
+                checkCreate(mapperTemp, root, f);
+
+
             } catch (TemplateException e) {
                 e.printStackTrace();
             } catch (IOException e) {
@@ -154,10 +163,9 @@ public class GencodeMojo extends AbstractMojo {
                 File f = new File(baseDir+"/src/main/java/"+basePackageName+"/service/");
                 f.mkdirs();
                 f = new File(baseDir+"/src/main/java/"+basePackageName+"/service/"+table.getTableName()+"Service.java");
-                f = checkFile(basePackageName, date, table, f);
-                FileWriter out = new FileWriter(f);
+//                f = checkFile(basePackageName, date, table, f);
+                checkCreate(serviceTemp, root, f);
 
-                serviceTemp.process(root, out);
             } catch (TemplateException e) {
                 e.printStackTrace();
             } catch (IOException e) {
@@ -167,10 +175,9 @@ public class GencodeMojo extends AbstractMojo {
                 File f = new File(baseDir+"/src/main/java/"+basePackageName+"/controller/");
                 f.mkdirs();
                 f = new File(baseDir+"/src/main/java/"+basePackageName+"/controller/"+table.getTableName()+"Controller.java");
-                f = checkFile(basePackageName, date, table, f);
-                FileWriter out = new FileWriter(f);
+//                f = checkFile(basePackageName, date, table, f);
+                checkCreate(controllerTemp, root, f);
 
-                controllerTemp.process(root, out);
             } catch (TemplateException e) {
                 e.printStackTrace();
             } catch (IOException e) {
@@ -179,6 +186,19 @@ public class GencodeMojo extends AbstractMojo {
         }
 
         DatabaseUtil.closeConnection();
+    }
+
+    private void checkCreate(Template controllerTemp, Map<String, Object> root, File f) throws IOException, TemplateException {
+        if(f.exists()){
+            if(override)
+                getLog().info("==>源文件已经存在，覆盖原文件:"+f.getAbsolutePath());
+            else
+                getLog().info("==>源文件已经存在，跳过:"+f.getAbsolutePath());
+        } else {
+            getLog().info("==>生成源文件:"+f.getAbsolutePath());
+            FileWriter out = new FileWriter(f);
+            controllerTemp.process(root, out);
+        }
     }
 
     private File checkFile(String basePackageName, Date date, Table table, File f) {

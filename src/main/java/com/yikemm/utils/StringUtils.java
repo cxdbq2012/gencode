@@ -9,6 +9,7 @@ public class StringUtils {
 
     public static String typeConvert(String dbType){
         switch (dbType){
+            case "TINYINT":return "Boolean";
             case "INT":return "Integer";
             case "CHAR":return "String";
             case "VARCHAR":return "String";

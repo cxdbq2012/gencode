@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 @Service
 public class ${table.tableName}Service {
@@ -18,7 +19,7 @@ public class ${table.tableName}Service {
     @Resource
     private ${table.tableName}Mapper mapper;
 
-    public ${table.tableName} selectList(String column,String v){
+    public List<${table.tableName}> selectList(String column,String v){
         QueryWrapper<${table.tableName}> qw = new QueryWrapper<>();
         qw.eq(column,v);
         return mapper.selectList(qw);

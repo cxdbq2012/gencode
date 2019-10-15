@@ -18,7 +18,19 @@ public class ${table.tableName}Service {
     @Resource
     private ${table.tableName}Mapper mapper;
 
-    public ${table.tableName} searchById(Integer id){
+    public ${table.tableName} selectList(String column,String v){
+        QueryWrapper<${table.tableName}> qw = new QueryWrapper<>();
+        qw.eq(column,v);
+        return mapper.selectList(qw);
+    }
+
+    public ${table.tableName} selectOne(String column,String v){
+        QueryWrapper<${table.tableName}> qw = new QueryWrapper<>();
+        qw.eq(column,v);
+        return mapper.selectOne(qw);
+    }
+
+    public ${table.tableName} selectById(Integer id){
         return mapper.selectById(id);
     }
 
